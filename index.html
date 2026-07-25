@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Login — Sistem Keuangan Sekolah</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="login-screen">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="logo-badge">SK</div>
+      <h1 id="appTitle">Sistem Keuangan Sekolah</h1>
+      <p>Masuk sesuai akun yang sudah didaftarkan admin</p>
+    </div>
+
+    <div id="errorBox" class="login-error hidden"></div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="nama@sekolah.sch.id" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="password">Kata Sandi</label>
+        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn-primary" id="loginBtn">Masuk</button>
+    </form>
+
+    <div class="login-footer">
+      Admin &amp; Bendahara akan diarahkan ke Dashboard.<br>
+      Wali Murid &amp; Siswa akan diarahkan ke Aplikasi.
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { doLogin, auth, userAuth, db } from "./js/db.js?v=3";
+  import { APP_NAME } from "./js/firebase-config.js?v=3";
+  import { get, ref } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  document.getElementById("appTitle").textContent = APP_NAME;
+
+  const form = document.getElementById("loginForm");
+  const errorBox = document.getElementById("errorBox");
+  const loginBtn = document.getElementById("loginBtn");
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.classList.remove("hidden");
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorBox.classList.add("hidden");
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Memeriksa akun...";
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    try {
+      // Coba login lewat instance "auth" (dipakai bersama untuk cek role dulu)
+      const cred = await doLogin(email, password, auth);
+      const uid = cred.user.uid;
+
+      const snap = await get(ref(db, `Users/${uid}`));
+      if (!snap.exists()) {
+        showError("Akun ditemukan tapi data role belum ada. Hubungi Admin.");
+        await signOut(auth);
+        return;
+      }
+      const profile = snap.val();
+
+      if (profile.status === "nonaktif") {
+        showError("Akun kamu dinonaktifkan. Hubungi sekolah.");
+        await signOut(auth);
+        return;
+      }
+
+      // Routing internal berdasarkan role dari database, BUKAN dari URL
+      if (profile.role === "Admin" || profile.role === "Bendahara") {
+        localStorage.setItem("sk_role", profile.role);
+        window.location.href = "dashboard.html";
+      } else if (profile.role === "WaliMurid" || profile.role === "Siswa") {
+        // Pindahkan sesi ke instance "userAuth" (App terpisah untuk Wali/Siswa),
+        // lalu bersihkan sesi di instance "auth" (dipakai khusus Admin/Bendahara).
+        await doLogin(email, password, userAuth);
+        await signOut(auth);
+        localStorage.setItem("sk_role", profile.role);
+        window.location.href = "user.html";
+      } else {
+        showError("Role akun tidak dikenali. Hubungi Admin.");
+        await signOut(auth);
+      }
+    } catch (err) {
+      console.error(err);
+      const map = {
+        "auth/invalid-credential": "Email atau kata sandi salah.",
+        "auth/user-not-found": "Akun tidak ditemukan.",
+        "auth/wrong-password": "Kata sandi salah.",
+        "auth/too-many-requests": "Terlalu banyak percobaan. Coba lagi nanti.",
+        "auth/invalid-email": "Format email tidak valid."
+      };
+      showError(map[err.code] || "Gagal masuk. Periksa koneksi & konfigurasi Firebase.");
+    } finally {
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Masuk";
+    }
+  });
+</script>
+</body>
+</html>

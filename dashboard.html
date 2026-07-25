@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Admin — Sistem Keuangan Sekolah</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div id="loader" class="loader-overlay">
+  <div class="spinner"></div>
+  <div class="muted">Memuat data...</div>
+</div>
+
+<div class="admin-shell hidden" id="adminShell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-badge">SK</div>
+      <span>Sistem Keuangan</span>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <div class="sidebar-group-label">Utama</div>
+      <a class="sidebar-link active" data-section="ringkasan"><span class="s-icon">📊</span>Ringkasan</a>
+
+      <div class="sidebar-group-label">Data Master</div>
+      <a class="sidebar-link" data-section="kelas"><span class="s-icon">🏫</span>Data Kelas</a>
+      <a class="sidebar-link" data-section="siswa"><span class="s-icon">🎓</span>Data Siswa</a>
+      <a class="sidebar-link" data-section="wali"><span class="s-icon">👪</span>Data Wali Murid</a>
+      <a class="sidebar-link" data-section="kategoritagihan"><span class="s-icon">📂</span>Kategori Tagihan</a>
+      <a class="sidebar-link" data-section="jenistagihan"><span class="s-icon">🏷️</span>Jenis Tagihan</a>
+      <a class="sidebar-link" data-section="aturantagihan"><span class="s-icon">📐</span>Aturan Tagihan per Kelas</a>
+
+      <div class="sidebar-group-label">Keuangan</div>
+      <a class="sidebar-link" data-section="tagihan"><span class="s-icon">🧾</span>Tagihan / Invoice</a>
+      <a class="sidebar-link" data-section="pembayaran"><span class="s-icon">💳</span>Pembayaran</a>
+      <a class="sidebar-link" data-section="kasmasuk"><span class="s-icon">📥</span>Kas Masuk</a>
+      <a class="sidebar-link" data-section="kaskeluar"><span class="s-icon">📤</span>Kas Keluar</a>
+
+      <div class="sidebar-group-label">Lainnya</div>
+      <a class="sidebar-link" data-section="laporan"><span class="s-icon">📑</span>Laporan</a>
+      <a class="sidebar-link" data-section="pengumuman"><span class="s-icon">📣</span>Pengumuman</a>
+      <a class="sidebar-link" data-section="pengaturan"><span class="s-icon">⚙️</span>Pengaturan</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="logoutBtn">🚪 Keluar</button>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle">☰</button>
+      <h1 id="sectionTitle">Ringkasan</h1>
+      <div class="spacer"></div>
+      <div class="search-box">🔍 <input placeholder="Cari..." id="globalSearch"></div>
+      <div class="topbar-avatar" id="avatarInitial">A</div>
+    </header>
+
+    <main class="content">
+
+      <!-- RINGKASAN -->
+      <section id="sec-ringkasan" class="sec">
+        <div class="stats-row">
+          <div class="stat-box"><div class="icon bg-blue">🎓</div><div><div class="num" id="statSiswa">0</div><div class="lbl">Total Siswa</div></div></div>
+          <div class="stat-box"><div class="icon bg-purple">👪</div><div><div class="num" id="statWali">0</div><div class="lbl">Total Wali Murid</div></div></div>
+          <div class="stat-box"><div class="icon bg-gold">🧾</div><div><div class="num" id="statTagihan">Rp 0</div><div class="lbl">Total Tagihan</div></div></div>
+          <div class="stat-box"><div class="icon bg-pink">⚠️</div><div><div class="num" id="statTunggakan">Rp 0</div><div class="lbl">Total Tunggakan</div></div></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="icon bg-green">📥</div><div><div class="num" id="statKasMasuk">Rp 0</div><div class="lbl">Kas Masuk (bulan ini)</div></div></div>
+          <div class="stat-box"><div class="icon bg-pink">📤</div><div><div class="num" id="statKasKeluar">Rp 0</div><div class="lbl">Kas Keluar (bulan ini)</div></div></div>
+          <div class="stat-box"><div class="icon bg-blue">💰</div><div><div class="num" id="statSaldo">Rp 0</div><div class="lbl">Saldo Kas</div></div></div>
+          <div class="stat-box"><div class="icon bg-gold">⏳</div><div><div class="num" id="statMenunggu">0</div><div class="lbl">Menunggu Verifikasi</div></div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Pembayaran Terbaru</h3></div>
+          <table>
+            <thead><tr><th>Siswa</th><th>Jenis Tagihan</th><th>Nominal</th><th>Tanggal</th><th>Status</th></tr></thead>
+            <tbody id="recentPaymentsBody"><tr><td colspan="5" class="muted">Belum ada data.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- DATA KELAS -->
+      <section id="sec-kelas" class="sec hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Data Kelas</h3>
+            <button class="btn-gold" id="btnAddKelas">+ Tambah Kelas</button>
+          </div>
+          <table>
+            <thead><tr><th>Nama Kelas</th><th>Tingkat</th><th>Tahun Ajaran</th><th>Jumlah Siswa</th><th>Aksi</th></tr></thead>
+            <tbody id="kelasBody"><tr><td colspan="5" class="muted">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- DATA SISWA -->
+      <section id="sec-siswa" class="sec hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Data Siswa</h3>
+            <button class="btn-gold" id="btnAddSiswa">+ Tambah Siswa</button>
+          </div>
+          <table>
+            <thead><tr><th>Nama</th><th>NIS</th><th>Kelas</th><th>Wali</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="siswaBody"><tr><td colspan="6" class="muted">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- DATA WALI -->
+      <section id="sec-wali" class="sec hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Data Wali Murid</h3>
+            <button class="btn-gold" id="btnAddWali">+ Tambah Wali</button>
+          </div>
+          <table>
+            <thead><tr><th>Nama</th><th>No. HP</th><th>Email</th><th>Jumlah Anak</th><th>Aksi</th></tr></thead>
+            <tbody id="waliBody"><tr><td colspan="5" class="muted">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- JENIS TAGIHAN -->
+      <section id="sec-jenistagihan" class="sec hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Master Jenis Tagihan</h3>
+            <button class="btn-gold" id="btnAddJenis">+ Tambah Jenis Tagihan</button>
+          </div>
+          <table>
+            <thead><tr><th>Nama</th><th>Kategori</th><th>Nominal Default</th><th>Aksi</th></tr></thead>
+            <tbody id="jenisBody"><tr><td colspan="4" class="muted">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- KATEGORI TAGIHAN -->
+      <section id="sec-kategoritagihan" class="sec hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Kategori Tagihan</h3>
+            <button class="btn-gold" id="btnAddKategori">+ Tambah Kategori</button>
+          </div>
+          <p class="muted" style="margin-top:-6px;">Contoh: Bulanan, Sekali Bayar, Tahunan. Kategori ini akan muncul sebagai pilihan saat membuat Jenis Tagihan.</p>
+          <table>
+            <thead><tr><th>Nama Kategori</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+            <tbody id="kategoriBody"><tr><td colspan="3" class="muted">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ATURAN TAGIHAN PER KELAS -->
+      <section id="sec-aturantagihan" class="sec hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Aturan Tagihan per Kelas</h3>
+            <button class="btn-gold" id="btnAddAturan">+ Tambah Aturan</button>
+          </div>
+          <p class="muted" style="margin-top:-6px;">Atur nominal berbeda untuk kelas tertentu (misalnya SPP kelas 1 naik tahun ini, kelas lain tetap). Kalau sebuah kelas tidak punya aturan khusus, sistem otomatis memakai Nominal Default dari Jenis Tagihan.</p>
+          <table>
+            <thead><tr><th>Jenis Tagihan</th><th>Kelas</th><th>Nominal Khusus</th><th>Tahun Ajaran</th><th>Aksi</th></tr></thead>
+            <tbody id="aturanBody"><tr><td colspan="5" class="muted">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAGIHAN -->
+      <section id="sec-tagihan" class="sec hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Tagihan / Invoice</h3>
+            <button class="btn-gold" id="btnGenerateTagihan">⚡ Generate Tagihan</button>
+          </div>
+          <table>
+            <thead><tr><th>Siswa</th><th>Kelas</th><th>Jenis</th><th>Nominal</th><th>Jatuh Tempo</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="tagihanBody"><tr><td colspan="7" class="muted">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PEMBAYARAN -->
+      <section id="sec-pembayaran" class="sec hidden">
+        <div class="panel">
+          <div class="panel-head"><h3>Verifikasi Pembayaran</h3></div>
+          <table>
+            <thead><tr><th>Siswa</th><th>Jenis Tagihan</th><th>Nominal</th><th>Bukti</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="pembayaranBody"><tr><td colspan="6" class="muted">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- KAS MASUK -->
+      <section id="sec-kasmasuk" class="sec hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Kas Masuk</h3>
+            <button class="btn-gold" id="btnAddKasMasuk">+ Tambah Kas Masuk</button>
+          </div>
+          <table>
+            <thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th>Nominal</th><th>Aksi</th></tr></thead>
+            <tbody id="kasMasukBody"><tr><td colspan="5" class="muted">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- KAS KELUAR -->
+      <section id="sec-kaskeluar" class="sec hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Kas Keluar</h3>
+            <button class="btn-gold" id="btnAddKasKeluar">+ Tambah Kas Keluar</button>
+          </div>
+          <table>
+            <thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th>Nominal</th><th>Aksi</th></tr></thead>
+            <tbody id="kasKeluarBody"><tr><td colspan="5" class="muted">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- LAPORAN -->
+      <section id="sec-laporan" class="sec hidden">
+        <div class="panel">
+          <div class="panel-head"><h3>Laporan</h3></div>
+          <p class="muted">Pilih jenis laporan, lalu gunakan tombol cetak browser (Ctrl/Cmd+P) untuk print PDF, atau export ke Excel.</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+            <button class="btn-outline" data-report="siswa">Laporan Data Siswa</button>
+            <button class="btn-outline" data-report="tagihan">Laporan Tagihan</button>
+            <button class="btn-outline" data-report="pembayaran">Laporan Pembayaran</button>
+            <button class="btn-outline" data-report="tunggakan">Laporan Tunggakan</button>
+            <button class="btn-outline" data-report="kasmasuk">Laporan Kas Masuk</button>
+            <button class="btn-outline" data-report="kaskeluar">Laporan Kas Keluar</button>
+            <button class="btn-outline" data-report="aruskas">Laporan Arus Kas</button>
+          </div>
+          <div id="reportOutput" style="margin-top:20px;"></div>
+        </div>
+      </section>
+
+      <!-- PENGUMUMAN -->
+      <section id="sec-pengumuman" class="sec hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Pengumuman</h3>
+            <button class="btn-gold" id="btnAddPengumuman">+ Buat Pengumuman</button>
+          </div>
+          <table>
+            <thead><tr><th>Judul</th><th>Periode</th><th>Aksi</th></tr></thead>
+            <tbody id="pengumumanBody"><tr><td colspan="3" class="muted">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PENGATURAN -->
+      <section id="sec-pengaturan" class="sec hidden">
+        <div class="panel">
+          <h3>Pengaturan Sekolah</h3>
+          <div class="field"><label>Nama Sekolah</label><input class="select" id="setNamaSekolah"></div>
+          <div class="field"><label>Tahun Ajaran Aktif</label><input class="select" id="setTahunAjaran"></div>
+          <button class="btn-gold" id="btnSaveSettings">Simpan Pengaturan</button>
+        </div>
+        <div class="panel">
+          <h3>Manajemen Bendahara</h3>
+          <button class="btn-gold" id="btnAddBendahara">+ Tambah Akun Bendahara</button>
+          <table style="margin-top:14px;">
+            <thead><tr><th>Nama</th><th>Email</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="bendaharaBody"><tr><td colspan="4" class="muted">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- Modal generik (dipakai untuk semua form tambah/edit) -->
+<div id="modalOverlay" class="modal-overlay hidden">
+  <div class="modal-sheet" id="modalSheet"></div>
+</div>
+
+<script type="module" src="js/admin.js?v=3"></script>
+</body>
+</html>
