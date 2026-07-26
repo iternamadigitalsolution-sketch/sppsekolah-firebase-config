@@ -22,7 +22,7 @@ import {
   getDatabase, ref, get, set, push, update, remove, query, orderByChild, equalTo
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-import { firebaseConfig, cloudinaryConfig } from "./firebase-config.js?v=3";
+import { firebaseConfig, cloudinaryConfig } from "./firebase-config.js";
 
 // ---------------------------------------------------------
 // Tiga instance Firebase App sesuai konsep:
@@ -218,6 +218,28 @@ export async function uploadToCloudinary(file, folder = "umum") {
 // =========================================================
 export async function logActivity(uid, action, detail = "") {
   return addRecord("ActivityLogs", { uid, action, detail, time: Date.now() });
+}
+
+// =========================================================
+// LOGIN PAKAI NO. HP — Firebase Auth (Email/Password) butuh format email,
+// jadi No. HP diubah dulu jadi "email sintetis" secara konsisten di sini.
+// Dipakai bersama oleh index.html (saat login) dan admin.js (saat membuat akun Wali Murid).
+// =========================================================
+
+/** Apakah teks ini kelihatan seperti No. HP (bukan email)? */
+export function looksLikePhoneNumber(input) {
+  const trimmed = input.trim();
+  if (trimmed.includes("@")) return false; // sudah berbentuk email
+  const digits = trimmed.replace(/[^0-9]/g, "");
+  return /^[0-9+()\s-]+$/.test(trimmed) && digits.length >= 8 && digits.length <= 15;
+}
+
+/** Ubah No. HP jadi email sintetis yang konsisten, contoh: 081234567890 -> 6281234567890@wali.sekolah.local */
+export function phoneToSyntheticEmail(phone) {
+  let digits = phone.replace(/[^0-9]/g, "");
+  if (digits.startsWith("0")) digits = "62" + digits.slice(1);
+  else if (!digits.startsWith("62")) digits = "62" + digits;
+  return `${digits}@wali.sekolah.local`;
 }
 
 // =========================================================
