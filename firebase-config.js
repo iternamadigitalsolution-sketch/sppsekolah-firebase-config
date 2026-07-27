@@ -21,6 +21,7 @@ export const firebaseConfig = {
 export const cloudinaryConfig = {
   cloudName: "udsougfj",
   uploadPreset: "foto_ktp_preset"
+};
 
 // Nama project, dipakai untuk judul di halaman & notifikasi
 export const APP_NAME = "Sistem Keuangan Sekolah";
