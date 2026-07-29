@@ -42,6 +42,7 @@ export const userAuth      = getAuth(userApp);
 // Koneksi database TERPISAH per App — ini kunci perbaikan bug "Permission denied"
 export const db     = getDatabase(defaultApp); // dipakai oleh dashboard.html (Admin/Bendahara)
 export const userDb = getDatabase(userApp);    // dipakai oleh user.html (Wali Murid/Siswa)
+export const secondaryDb = getDatabase(secondaryApp); // dipakai untuk cek role sesaat di index.html, TANPA mengganggu koneksi "db" milik Admin
 
 // =========================================================
 // AUTH HELPERS
